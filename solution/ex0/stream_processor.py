@@ -6,10 +6,12 @@ Different processors handle different data types while sharing
 the same method names.
 """
 
+from typing import Any, List, Union
+
 
 class DataProcessor:
     # Base class defining a common processing interface
-    def __init__(self, data) -> None:
+    def __init__(self, data: Any) -> None:
         self.data = data
 
     def validate(self) -> str:
@@ -27,6 +29,8 @@ class DataProcessor:
 
 class NumericProcessor(DataProcessor):
     # Processor specialized for numeric lists.
+    def __init__(self, data: List[Union[int, float]] = None) -> None:
+        super().__init__(data)
 
     def validate(self) -> str:
         try:
@@ -59,6 +63,8 @@ class NumericProcessor(DataProcessor):
 
 class TextProcessor(DataProcessor):
     # Processor specialized for text strings.
+    def __init__(self, data: str = None) -> None:
+        super().__init__(data)
 
     def validate(self) -> str:
         try:
@@ -70,7 +76,7 @@ class TextProcessor(DataProcessor):
 
     def format_output(self) -> str:
         try:
-            # Count the numebr of characters
+            # Count the number of characters
             num_chars = len(self.data)
 
             # Count the number of words
@@ -79,8 +85,8 @@ class TextProcessor(DataProcessor):
 
             for char in self.data:
                 """
-                If current char is not a space and previous was a space
-                , a new word starts
+                If current char is not a space and previous was a space,
+                a new word starts
                 """
                 if char != " " and previous_was_space:
                     word_count += 1
@@ -88,14 +94,21 @@ class TextProcessor(DataProcessor):
                 elif char == " ":
                     previous_was_space = True
 
-                return (f"Output: Processed text: {num_chars} characters, "
-                        f"{word_count} words")
+            return (
+                f"Output: Processed text: {num_chars} characters, "
+                f"{word_count} words"
+            )
+        except (TypeError, ValueError):
+            return "Error: Processed data"
+
         except (TypeError, ValueError):
             return "Error: Processed data"
 
 
 class LogProcessor(DataProcessor):
     # Processor specialized for log entries.
+    def __init__(self, data: str = None) -> None:
+        super().__init__(data)
 
     def validate(self) -> str:
         try:

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from typing import Any, List, Dict, Optional
+
 """
 Polymorphic stream processing system using a unified DataStream interface.
 """
@@ -15,15 +17,15 @@ class DataStream:
         # Setup the stream connections, initial state, etc.)
         raise NotImplementedError
 
-    def process_batch(self, batch) -> str:
+    def process_batch(self, batch: List[Any]) -> str:
         # Process a batch and return a summary string
         raise NotImplementedError
 
-    def filter(self, batch):
+    def filter(self, batch: List[Any]) -> List[Any]:
         # Filter a batch and return filtered data
         raise NotImplementedError
 
-    def transform(self, batch):
+    def transform(self, batch: List[Any]) -> List[Any]:
         # Transform a batch and return transformed data
         raise NotImplementedError
 
@@ -35,7 +37,7 @@ class SensorStream(DataStream):
         print("Initializing Sensor Stream...")
         print(f"Stream ID: {self.stream_id}, Type: Environmental Data\n")
 
-    def process_batch(self, batch) -> str:
+    def process_batch(self, batch: List[Dict[str, float]]) -> str:
         # Compute average temperature from readings
         total = 0
         count = 0
@@ -52,7 +54,7 @@ class SensorStream(DataStream):
         return (f"Sensor analysis: {count} "
                 f"readings processed, avg temp: {avg:.1f}ºC")
 
-    def filter(self, batch) -> list:
+    def filter(self, batch: List[Dict[str, float]]) -> List[Dict[str, float]]:
         # Keep only readings above 30 degrees
         result = []
         for r in batch:
@@ -60,7 +62,8 @@ class SensorStream(DataStream):
                 result.append(r)
         return result
 
-    def transform(self, batch) -> list:
+    def transform(
+            self, batch: List[Dict[str, float]]) -> List[Dict[str, float]]:
         # Add calibration offset (+1 degree)
         result = []
         for r in batch:
@@ -75,7 +78,7 @@ class TransactionStream(DataStream):
         print("Initializing Transaction Stream...")
         print(f"Stream ID: {self.stream_id}, Type: Financial Data\n")
 
-    def process_batch(self, batch) -> str:
+    def process_batch(self, batch: List[Dict[str, Any]]) -> str:
         # Calculate net flow buy/sell operations
         net = 0
         for tx in batch:
@@ -88,7 +91,7 @@ class TransactionStream(DataStream):
         return (f"Transaction analysis: {len(batch)} "
                 f"operations, net flow: {sign}{net} units")
 
-    def filter(self, batch) -> list:
+    def filter(self, batch: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         # Keep only transactions greater than 100 units
         result = []
         for tx in batch:
@@ -96,7 +99,7 @@ class TransactionStream(DataStream):
                 result.append(tx)
         return result
 
-    def transform(self, batch) -> list:
+    def transform(self, batch: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         # Apply 5% fee to each transaction
         result = []
         for tx in batch:
@@ -111,7 +114,7 @@ class EventStream(DataStream):
         print("Initializing Event Stream...")
         print(f"Stream ID: {self.stream_id}, Type: System Events\n")
 
-    def process_batch(self, batch) -> str:
+    def process_batch(self, batch: List[str]) -> str:
         # Count error events in the batch
         errors = 0
         for e in batch:
@@ -119,7 +122,7 @@ class EventStream(DataStream):
                 errors += 1
         return f"Event analysis: {len(batch)} events, {errors} error detected"
 
-    def filter(self, batch) -> list:
+    def filter(self, batch: List[str]) -> List[str]:
         # Keep only "error" events
         result = []
         for e in batch:
@@ -127,7 +130,7 @@ class EventStream(DataStream):
                 result.append(e)
         return result
 
-    def transform(self, batch) -> list:
+    def transform(self, batch: List[str]) -> List[str]:
         # Convert events to uppercase strings
         result = []
         for e in batch:
@@ -141,7 +144,7 @@ class StreamProcessor:
         # Store registered streams
         self.streams = []
 
-    def add_stream(self, stream) -> None:
+    def add_stream(self, stream: DataStream) -> None:
         # Add a stream to the processor
         if isinstance(stream, DataStream):
             self.streams.append(stream)
@@ -154,7 +157,7 @@ class StreamProcessor:
             except Exception:
                 print("Initialization error")
 
-    def process_all(self, batches) -> list:
+    def process_all(self, batches: List[Optional[List[Any]]]) -> List[str]:
         # Process each stream with its corresponding batch
         results = []
         # We use an index to match the stream with its data batch
